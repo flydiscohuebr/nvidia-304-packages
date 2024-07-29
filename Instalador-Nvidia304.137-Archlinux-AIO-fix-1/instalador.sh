@@ -4,13 +4,19 @@
 #feito por Flydiscohuebr
 #===========================================
 
-#update 2024-06-30
+#update 2024-07-29
 
 #testes
 #Verificando se e ROOT!
 #==========================
 [[ "$UID" -ne "0" ]] || { echo -e "Execute sem permissao root" ; exit 1 ;}
 #==========================
+
+#wget
+if ! command -v wget >/dev/null; then
+    echo "wget não encontrado! Instalando..."
+    sudo pacman -S wget --noconfirm
+fi
 
 #verificando se tem interwebs
 #=====================================================
@@ -27,51 +33,36 @@ if [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
     KDE_workaround=1
 fi
 
-#makepkg reset
-#
-cd $PWD/pacotes
-cd lib32-nvidia-304xx-utils/
-sudo rm -r pkg/ src/ *.zst *.run *.tar
-cd ../nvidia-304xx-lts/
-sudo rm -r pkg/ src/ *.zst *.run *.tar
-cd ../nvidia-304xx-utils/
-sudo rm -r pkg/ src/ *.zst *.run *.tar
-cd ../../
-#
-
-#identificando se o linux-lts esta instalado
-#
-pacman -Q linux-lts &> /dev/null
-if [ ! $? -eq 0 ]; then
-    echo "O pacote linux-lts não foi detectado"
-    echo "Instalando agora"
-    sudo pacman -S --needed linux-lts linux-lts-headers
-    echo 'Agora reinicie o computador e escolha o kernel linux-lts no grub'
-    echo 'Apos isso rode o instalador novamente'
-    exit 1
+lts_check=$(uname -r | cut -d"-" -f 3)
+if [ "$lts_check" = "lts" ]; then
+   kernel_flavor="linux-lts"
+   echo "Kernel LTS detectado"
+else
+   kernel_flavor="linux"
 fi
 
-pacman -Q linux-lts-headers &> /dev/null
+#identificando se o linux-headers esta instalado
+pacman -Q $kernel_flavor-headers &> /dev/null
 if [ ! $? -eq 0 ]; then
-    echo "O pacote linux-headers nao foi detectado"
+    echo "O pacote $kernel_flavor-headers nao foi detectado"
     echo "Instalando agora"
-    sudo pacman -S --needed --noconfirm linux-lts-headers
+    sudo pacman -S --needed --noconfirm $kernel_flavor-headers
 fi
 
 echo '
 -----------------------------------------------------------------------
 Instalador nao oficial do driver nvidia 304.137
 by: Flydiscohuebr
-qualquer erro ou problema durante a instalação envie uma mensagem no meu telegram
+qualquer erro ou problema durante a instalação envie uma mensagem no meu
+telegram
+
 Telegram: @Flydiscohuebr
 ou no comentario do video correspondente
 -----------------------------------------------------------------------
-'
 
-echo '
 IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
 
-OBS: Testado com kernel 6.9 e anteriores
+OBS: Testado com kernel 6.10 e anteriores
 Antes de iniciarmos, verifique se o sistema está 100% atualizado.
 
 OBS: confirme todas as perguntas a seguir e digite sua senha de usuário quando perguntado.
@@ -81,6 +72,7 @@ Dica: tenha também uma conexão com a internet estável, pois vai ser necessár
 
 IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
 '
+
 read -p "aperte enter para continuar ou ctrl+c para sair "
 
 # isso vai ajudar a galera que não olha a descrição do video
@@ -105,15 +97,23 @@ cd ../
 #instalando os bagui da nvidia agr
 #nvidia-304xx-utils
 cd nvidia-304xx-utils
-makepkg -si --noconfirm
+makepkg -cfis --noconfirm
 cd ../
-#nvidia-304xx-lts
-cd nvidia-304xx-lts
-makepkg -si --noconfirm
-cd ../
+
+#nvidia-304xx-?
+if [ "$lts_check" = "lts" ]; then
+    cd nvidia-304xx-lts
+    makepkg -cfis --noconfirm
+    cd ../
+else
+    cd nvidia-304xx
+    makepkg -cfis --noconfirm
+    cd ../
+fi
+
 #lib32-nvidia-304xx-utils
 cd lib32-nvidia-304xx-utils
-makepkg -si --noconfirm
+makepkg -cfis --noconfirm
 cd ../
 
 #criando o xorg.conf e movendo pra /etc/X11/xorg.conf.d
@@ -137,10 +137,10 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 pacman -Q dracut &> /dev/null
 if [ $? -eq 0 ]; then
     echo "Dracut detectado"
-    sudo dracut --force /boot/initramfs-linux-lts.img
-    sudo dracut -N --force /boot/initramfs-linux-lts-fallback.img
+    sudo dracut --force /boot/initramfs-linux.img
+    sudo dracut -N --force /boot/initramfs-linux-fallback.img
 else
-    sudo mkinitcpio -p linux-lts
+    sudo mkinitcpio -p linux
 fi
 
 #fix segfault
@@ -181,6 +181,7 @@ reinicie o computador agora
 qualquer coisa
 Telegram: @Flydiscohuebr
 ou escreva um comentario no video que vc baixou isso :)
+OBS: caso o pc trave nessa parte puxe da tomada e ligue novamente XD
 '
     sudo patchelf --add-needed /usr/lib/nvidia/libGL.so.1 /usr/lib/libQt6Gui.so.6
 fi

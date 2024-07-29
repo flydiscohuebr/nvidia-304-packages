@@ -3,6 +3,11 @@
 #==========================
 [[ "$UID" -ne "0" ]] && { echo -e "Necessita de root para executar o programa. \nexecute o comando logado como usuario root usando o comando su - \nou usando o comando sudo ex: sudo ./desinstalador.sh" ; exit 1 ;}
 #==========================
+#wget
+if ! command -v wget >/dev/null; then
+    echo "wget não encontrado! Instalando..."
+    sudo pacman -S wget --noconfirm
+fi
 #verificando se tem interwebs
 #=====================================================
 if ! wget -q --spider www.google.com; then
@@ -32,7 +37,9 @@ fi
 
 echo "removendo o driver nvidia 304"
 #removendo os pacotes do driver nvidia304
-pacman -R --noconfirm lib32-nvidia-304xx-utils lib32-opencl-nvidia-304xx linux-nvidia-304xx nvidia-304xx-utils opencl-nvidia-304xx lib32-opencl-nvidia-304xx
+pacman -R --noconfirm linux-lts-nvidia-304xx
+pacman -R --noconfirm linux-nvidia-304xx
+pacman -R --noconfirm lib32-nvidia-304xx-utils lib32-opencl-nvidia-304xx nvidia-304xx-utils opencl-nvidia-304xx lib32-opencl-nvidia-304xx
 
 #instalando o xorg novamente
 yes | LC_ALL=en_US.UTF-8 pacman -S xf86-video-nouveau xorg-server xorg-server-common xf86-input-libinput
