@@ -4,7 +4,7 @@
 #feito por Flydiscohuebr
 #===========================================
 
-#UPDATE 2024/07/29
+#UPDATE 2024/09/05
 
 #testes
 #Verificando se e ROOT!
@@ -88,11 +88,30 @@ sudo apt install --reinstall libvdpau1
 kernel_versi=$(uname -r | cut -d"." -f1-2)
 if [[ "$kernel_versi" > "6.1" ]]; then
   sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& nvidia_drm.modeset=1/' /etc/default/grub
+  #Extra - nvidia_drm.modeset=1 não esta desabilitando o simpledrm/framebuffer na maioria dos casos
+  sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& initcall_blacklist=simpledrm_platform_driver_init/' /etc/default/grub
   sudo update-grub
 fi
 
 #fix segmentation fault (versões recentes do ubuntu)
+#talvez não mais necessario
 sudo patchelf --add-needed /usr/lib/x86_64-linux-gnu/libpthread.so.0 /usr/lib/x86_64-linux-gnu/libGL.so.304.137
+
+#echo "
+#TODO:
+#"
+#read -p "[S/N?] " resp1
+#resp1=${resp1^^}
+#case $resp1 in
+#  SIM|S)
+#    if [[ -f "/lib/x86_64-linux-gnu/libEGL.so.1" ]]; then
+#      sudo rm -rf /lib/x86_64-linux-gnu/libEGL*
+#    fi
+#    ;;
+#  *)
+#    echo "continuando"
+#    ;;
+#esac
 
 echo "Reincie o computador agora!"
 
