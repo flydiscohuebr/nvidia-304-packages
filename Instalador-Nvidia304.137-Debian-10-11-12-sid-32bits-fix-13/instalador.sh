@@ -137,12 +137,11 @@ echo '
 -----------------------------------------------------------------------
         Instalador não oficial do Driver NVidia 304-137 32-Bits
         Suportando Debian 10/11/12/testing/sid e derivados
-        Testado no kernel 6.6
+        Testado no kernel 6.1
         By: Flydiscohuebr
 
-        Problemas Durante a Instalação? Chame no telegram
-        @Flydiscohuebr
-        Ou deixe no comentario do video :)
+        Problemas Durante a Instalação?
+        Deixe no comentario do video :)
         https://www.youtube.com/@flydiscohuebr
 -----------------------------------------------------------------------
 '
