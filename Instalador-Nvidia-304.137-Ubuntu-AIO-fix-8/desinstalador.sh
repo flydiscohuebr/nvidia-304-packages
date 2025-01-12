@@ -8,9 +8,9 @@ sudo rm /etc/X11/xorg.conf
 sudo rm /etc/X11/xorg.conf.backup
 sudo rm /etc/X11/xorg.conf.nvidia-xconfig-original 
 sudo apt update && sudo apt upgrade && sudo apt install xserver-xorg-core xserver-xorg-video-all -y
-#acima do kernel 6.1 adicionar o parametro nvidia_drm.modeset=1 por que sim
+#acima do kernel 5.17 adicionar o parametro nvidia_drm.modeset=1 por que sim
 kernel_versi=$(uname -r | cut -d"." -f1-2)
-if [[ "$kernel_versi" > "6.1" ]]; then
+if [[ "$kernel_versi" > "5.17" ]]; then
   sudo sed -i 's/nvidia_drm.modeset=1//g' /etc/default/grub
   sudo sed -i 's/initcall_blacklist=simpledrm_platform_driver_init//g' /etc/default/grub
 fi
